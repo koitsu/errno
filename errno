@@ -19,14 +19,15 @@ Options:
   -l, --list                 list all known error codes details
   -h, --help                 print this message
 
-CODE argument(s) required unless --list is used.
+CODE argument(s) required unless -l/--list is used.
 
 Internally this program uses the Errno module that comes with
 Perl.  Any error codes which your OS supports which *aren't*
 available is not the fault of this program but rather the build
 or package of Perl installed on your system.
 
-Report bugs to <jdc\@koitsu.org>
+https://github.com/koitsu/errno
+Report bugs at https://github.com/koitsu/errno/issues
 EOF
 
   exit(1);
