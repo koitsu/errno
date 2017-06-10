@@ -1,0 +1,83 @@
+#!/usr/local/bin/perl
+use strict;
+use warnings;
+use Getopt::Long;
+use Errno;
+
+# %data hash format:
+# key   = errno number (ex. 4)
+# value = string       (ex. EINTR)
+#
+use vars qw(%data $arg);
+
+sub usage {
+  print <<"EOF";
+Usage: $0 [OPTION] CODE...
+
+Options:
+
+  -l, --list                 list all known error codes details
+  -h, --help                 print this message
+
+CODE argument(s) required unless --list is used.
+
+Internally this program uses the Errno module that comes with
+Perl.  Any error codes which your OS supports which *aren't*
+available is not the fault of this program but rather the build
+or package of Perl installed on your system.
+
+Report bugs to <jdc\@koitsu.org>
+EOF
+
+  exit(1);
+}
+
+# Refer to perldoc Errno for details about the %! hash.
+#
+sub populate_data {
+  foreach my $name (keys %!) {
+    my $code = Errno->$name;
+    $data{$code} = $name;
+  }
+}
+
+sub list_codes {
+  populate_data();
+  foreach my $code (sort {$a <=> $b} keys %data) {
+    $! = $code;
+    printf "Error code %3u: %s (%s)\n", $code, $!, $data{$code};
+  }
+  exit(0);
+}
+
+
+
+GetOptions(
+  "list|l"   => \&list_codes,
+  "help|h|?" => \&usage
+) or usage();
+
+usage() if (scalar @ARGV == 0);
+
+populate_data();
+
+# Validate arguments, ensuring they are:
+# 1) Valid unsigned integers,
+# 2) Keys that exist in the %data hash.
+#
+foreach my $arg (@ARGV) {
+  if ($arg !~ /^\d+$/) {
+    print "ERROR: '$arg' is not an unsigned integer.\n";
+    exit(1);
+  }
+  elsif (not exists $data{$arg}) {
+    print "ERROR: Error code $arg unknown. Try using --list.\n";
+    exit(1);
+  }
+}
+
+foreach my $arg (@ARGV) {
+  $! = $arg;
+  printf "Error code %3u: %s (%s)\n", $arg, $!, $data{$arg};
+}
+
