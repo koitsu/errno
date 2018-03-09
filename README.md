@@ -53,3 +53,6 @@ $ errno 12345 ; echo $?
 ERROR: Error code 12345 unknown. Try using --list.
 1
 ```
+
+# License
+errno is released under the 2-clause BSD license ("FreeBSD License") per [LICENSE](LICENSE).

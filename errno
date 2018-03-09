@@ -1,4 +1,7 @@
 #!/usr/local/bin/perl
+#
+# SPDX-License-Identifier: BSD-2-Clause-FreeBSD
+#
 use strict;
 use warnings;
 use Getopt::Long;
