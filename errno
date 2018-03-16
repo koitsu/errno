@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/env perl
 #
 # SPDX-License-Identifier: BSD-2-Clause-FreeBSD
 #
@@ -7,7 +7,9 @@ use warnings;
 use Getopt::Long;
 use Errno;
 
+#
 # %data hash format:
+#
 # key   = errno number (ex. 4)
 # value = string       (ex. EINTR)
 #
@@ -19,9 +21,9 @@ Usage: $0 [OPTION] CODE...
 
 Options:
 
-  -l, --list                 list all known error codes details
-  -s, --short                omit error code and name from output
-  -h, --help                 print this message
+  -l, --list            list all known error codes details
+  -s, --short           omit error code and name from output
+  -h, --help            print this message
 
 CODE argument(s) required unless -l/--list is used.
 
@@ -37,58 +39,60 @@ EOF
   exit(1);
 }
 
+#
 # Refer to perldoc Errno for details about the %! hash.
 #
 sub populate_data {
-  foreach my $name (keys %!) {
-    my $code = Errno->$name;
-    $data{$code} = $name;
-  }
+	foreach my $name (keys %!) {
+		my $code = Errno->$name;
+		$data{$code} = $name;
+	}
 }
 
 sub list_codes {
-  populate_data();
-  foreach my $code (sort {$a <=> $b} keys %data) {
-    $! = $code;
-    printf "Error code %3u: %s (%s)\n", $code, $!, $data{$code};
-  }
-  exit(0);
+	populate_data();
+
+	foreach my $code (sort {$a <=> $b} keys %data) {
+		$! = $code;
+		printf "Error code %3u: %s (%s)\n", $code, $!, $data{$code};
+	}
+	exit(0);
 }
 
 
 
 GetOptions(
-  "list|l"   => \&list_codes,
-  "short|s"  => \$enable_short,
-  "help|h|?" => \&usage
+	"list|l"   => \&list_codes,
+	"short|s"  => \$enable_short,
+	"help|h|?" => \&usage
 ) or usage();
 
 usage() if (scalar @ARGV == 0);
 
 populate_data();
 
+#
 # Validate arguments, ensuring they are:
 # 1) Valid unsigned integers,
 # 2) Keys that exist in the %data hash.
 #
 foreach my $arg (@ARGV) {
-  if ($arg !~ /^\d+$/) {
-    print "ERROR: '$arg' is not an unsigned integer.\n";
-    exit(1);
-  }
-  elsif (not exists $data{$arg}) {
-    print "ERROR: Error code $arg unknown. Try using --list.\n";
-    exit(1);
-  }
+	if ($arg !~ /^\d+$/) {
+		print "ERROR: '$arg' is not an unsigned integer.\n";
+		exit(1);
+	}
+	elsif (not exists $data{$arg}) {
+		print "ERROR: Error code $arg unknown. Try using --list.\n";
+		exit(1);
+	}
 }
 
 foreach my $arg (@ARGV) {
-  $! = $arg;
-  if ($enable_short) {
-    print $!, "\n";
-  }
-  else {
-    printf "Error code %3u: %s (%s)\n", $arg, $!, $data{$arg};
-  }
+	$! = $arg;
+	if ($enable_short) {
+		print $!, "\n";
+	} else {
+		printf "Error code %3u: %s (%s)\n", $arg, $!, $data{$arg};
+	}
 }
 
